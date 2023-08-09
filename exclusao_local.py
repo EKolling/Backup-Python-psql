@@ -22,8 +22,6 @@ def main():
     periodo_ret_local = int(os.getenv("RETENTION_DATE_PERIOD_LOCAL"))
     periodo_ret_max = int(os.getenv("RETENTION_DATE_MAX"))
 
-
-
     # Lista os arquivos antigos
     arquivos_antigos = listar_arquivos_antigos(diretorio_de_backup, periodo_ret_local, periodo_ret_max)
 
