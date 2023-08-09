@@ -29,13 +29,14 @@ def main():
 
     # Carregando variáveis do .env
     global user_db, database
-    user_db = config["USER_DB"]
-    database = config["DATABASE"]
+    env_path = '.env'
+    user_db = os.getenv('USER_DB')
+    database = os.getenv('DATABASE')
 
     # Outras variáveis
-    contract = config["PATH_IMPORT"]
-    tipo_sistema = config["EXTRUCTURE"]
-    diretorio_de_backup = config["FOLDER_BACKUP"]
+    contract = os.getenv('PATH_IMPORT')
+    tipo_sistema = os.getenv('EXTRUCTURE')
+    diretorio_de_backup  = os.getenv('FOLDER_BACKUP')
     hora_atual = datetime.now().strftime('%H-%M-%S')
     dia_atual = datetime.now().strftime('%Y-%m-%d')
 
