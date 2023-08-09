@@ -1,38 +1,58 @@
 import os
+from crontab import CronTab
+from dotenv import load_dotenv
+import subprocess
 
-def configurar_agendamento_cron():
-    # Remover todos os agendamentos anteriores
-    os.system("crontab -r")
-    print("Todos os agendamentos anteriores foram removidos.")
+# Carrega as variáveis de ambiente do arquivo .env
+load_dotenv()
 
-    # Obter a estrutura de horários do arquivo .env
-    horarios = os.getenv("HORARIOS_BACKUP")
-    local_index = os.getenv("CAMINHO_INDEX")
-    local_logs = os.getenv("LOGS")
+# Acesse as variáveis de ambiente definidas no arquivo .env
+horarios_backup = os.getenv("HORARIOS_BACKUP")
+local_backup = os.getenv("LOCAL_BACKUP")
+output_file = os.getenv("OUTPUT_FILE")
 
+# Monta o comando para o cronjob
+cron_command = f"cd {local_backup} && python3 main.py > {output_file}"
 
-    # Adicionar o agendamento ao crontab
-    comando_agendamento = f"echo '{horarios} /usr/bin/python3 {local_index} > {local_logs}' | crontab -"
-    os.system(comando_agendamento)
-    print("Novo agendamento do backup realizado.")
+# Função para visualizar o cron atual
+def mostrar_cron_atual():
+    cron = CronTab(user=True)
+    print("Cronjobs atuais:")
+    for job in cron:
+        print(job)
 
-    # Reiniciar o serviço cron
-    os.system("sudo service cron restart")
-    print("Serviço cron reiniciado.")
+# Função para remover o cron atual
+def remover_cron_atual():
+    cron = CronTab(user=True)
+    cron.remove_all()
+    cron.write()
+    print("Cronjobs removidos com sucesso!")
 
-# Configurações
-caminho_env = ".env"
+# Função para adicionar o novo cronjob
+def adicionar_novo_cron():
+    cron = CronTab(user=True)
+    job = cron.new(command=cron_command)
+    job.setall(horarios_backup)  # Define o horário do cronjob
+    cron.write()
+    print("Novo cronjob configurado com sucesso!")
 
-# Carregar variáveis de ambiente do arquivo .env
-with open(caminho_env, "r") as env_file:
-    env_vars = env_file.readlines()
+def restart_cron_service():
+    try:
+        subprocess.run(["sudo", "service", "cron", "restart"], check=True)
+        print("Serviço do cron reiniciado com sucesso!")
+    except subprocess.CalledProcessError as e:
+        print(f"Ocorreu um erro ao reiniciar o serviço do cron: {e}")
 
-for env_var in env_vars:
-    env_var = env_var.strip()
-    if "=" in env_var:
-        key, value = env_var.split("=", 1)
-        os.environ[key] = value
+# Mostra o cron atual antes de perguntar se deseja remover
+mostrar_cron_atual()
 
+# Pergunta ao usuário se ele deseja remover o cron atual antes de adicionar o novo
+resposta = input("Deseja remover o cronjob atual antes de adicionar o novo? (S/N): ").strip().lower()
+if resposta == "s":
+    remover_cron_atual()
 
-# Configurar o agendamento do cron e reiniciar o serviço
-configurar_agendamento_cron()
+# Adiciona o novo cronjob
+adicionar_novo_cron()
+
+# Reinicia o serviço do cron
+restart_cron_service()
