@@ -11,7 +11,7 @@ apt update
 apt install -y python3-pip
 
 # Instala as dependências
-pip3 install python-dotenv python-dateutil boto3 python-crontab
+pip3 install python-dotenv python-dateutil boto3 python-crontab tqdm py-zabbix
 
 # Atualiza o AWS CLI, caso já esteja instalado
 pip3 install --upgrade awscli
